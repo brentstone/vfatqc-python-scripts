@@ -49,6 +49,31 @@ def launchArgs(tool, cardName, shelf, link, vfatmask, scanmin, scanmax, nevts, s
 #    if calSF:
 #      cmd.append("--calSF=%s"%(calSF))
     pass
+  elif tool == "trimChamberV3.py":
+    scanType = "trim"
+    dataType="Trim"
+    preCmd = ["confChamber.py","--cardName=%s"%(cardName),"-g%i"%(link),"--zeroChan"]
+    if vt1 in range(256):
+      preCmd.append("--vt1=%i"%(vt1))
+      pass
+    dirPath = "%s/%s/%s/z%f/"%(dataPath,chamber_config[link],scanType,ztrim)
+    setupCmds.append( ["mkdir","-p",dirPath+startTime] )
+    setupCmds.append( ["unlink",dirPath+"current"] )
+    setupCmds.append( ["ln","-s",startTime,dirPath+"current"] )
+    dirPath = dirPath+startTime
+    cmd.append("--calFileCAL=%s"%(calFileCAL))
+    cmd.append("--calFileARM=%s"%(calFileARM))
+    cmd.append("--ztrim=%f"%(ztrim))
+    if vt1 in range(256):
+      cmd.append("--armDAC=%i"%(vt1))
+      pass
+    if printSummary:
+      cmd.append("--printSummary")
+        if chMin:
+      cmd.append("--chMin=%s"%(chMin))
+    if chMax:
+      cmd.append("--chMax=%s"%(chMax))
+
   elif tool == "trimChamber.py":
     scanType = "trim"
     dataType = None
