@@ -7,7 +7,7 @@ def launchArgs(tool, cardName, shelf, link, vfatmask, scanmin, scanmax, nevts, s
                vt1,vt2,mspl,l1atime,perchannel=False,trkdata=False,ztrim=4.0,
                config=False,amc13local=False,t3trig=False, randoms=0, throttle=0,
                internal=False, debug=False, voltageStepPulse=False, latency=33, CalPhase=0,
-               chMin=0, chMax=127, calSF=0, pulseDelay=40):
+               chMin=0, chMax=127, calSF=0, pulseDelay=40, calFileCAL=None, calFileARM=None, printSummary=False):
   import os,sys
   import subprocess
   from subprocess import CalledProcessError
@@ -64,15 +64,18 @@ def launchArgs(tool, cardName, shelf, link, vfatmask, scanmin, scanmax, nevts, s
     cmd.append("--calFileCAL=%s"%(calFileCAL))
     cmd.append("--calFileARM=%s"%(calFileARM))
     cmd.append("--ztrim=%f"%(ztrim))
+    cmd.append("--latency=%s"%(latency))
     if vt1 in range(256):
       cmd.append("--armDAC=%i"%(vt1))
       pass
     if printSummary:
       cmd.append("--printSummary")
-        if chMin:
+    if chMin:
       cmd.append("--chMin=%s"%(chMin))
     if chMax:
       cmd.append("--chMax=%s"%(chMax))
+    if voltageStepPulse:
+      cmd.append("--voltageStepPulse")
 
   elif tool == "trimChamber.py":
     scanType = "trim"
@@ -192,6 +195,12 @@ if __name__ == '__main__':
 
   parser.add_option("--amc13local", action="store_true", dest="amc13local",
                     help="Set up for using AMC13 local trigger generator", metavar="amc13local")
+  parser.add_option("--calFileARM", type="string", dest="calFileARM", default=None,
+                    help="File specifying THR_ARM_DAC to fC equations per VFAT",
+                    metavar="calFileARM")
+  parser.add_option("--calFileCAL", type="string", dest="calFileCAL", default=None,
+                    help="File specifying CAL_DAC to fC equations per VFAT",
+                    metavar="calFileCAL")
   parser.add_option("--CalPhase", type="int", dest = "CalPhase", default = 0,
                     help="Specify CalPhase. Must be in range 0-8", metavar="CalPhase")
   parser.add_option("--calSF", type="int", dest = "calSF", default = 0,
@@ -208,6 +217,9 @@ if __name__ == '__main__':
                     help="Specify Latency", metavar="latency")
   parser.add_option("--perchannel", action="store_true", dest="perchannel",
                     help="Run a per-channel VT1 scan", metavar="perchannel")
+  parser.add_option("--printSummary", action="store_true", dest="printSummary",
+                    help="Prints a summary table describing the results before and after trimming",
+                    metavar="printSummary")
   parser.add_option("--randoms", type="int", default=0, dest="randoms",
                     help="Set up for using AMC13 local trigger generator to generate random triggers with rate specified",
                     metavar="randoms")
@@ -301,7 +313,10 @@ if __name__ == '__main__':
                options.calSF,
                options.chMin,
                options.chMax,
-               options.pDel
+               options.pDel,
+               options.calFileCAL,
+               options.calFileARM,
+               options.printSummary
       ])
       pass
     pass
